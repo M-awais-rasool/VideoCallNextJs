@@ -160,25 +160,46 @@ export default function VideoRoom({ roomName, token, onLeave }: VideoRoomProps) 
   }, [room, localTracks, onLeave]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 p-4">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-semibold text-gray-800">Room: {roomName}</h2>
+    <div className="flex flex-col h-full bg-gray-900">
+      <div className="flex-1 p-2 md:p-4 overflow-hidden">
+        <div className="text-center mb-2 md:mb-4">
+          <h2 className="text-xl md:text-2xl font-semibold text-white">{roomName}</h2>
+          <p className="text-sm text-gray-300">{participants.length + (room ? 1 : 0)} participants</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {room && (
-            <Participant
-              key={room.localParticipant.sid}
-              participant={room.localParticipant}
-              isLocal={true}
-            />
-          )}
-          {participants.map((participant) => (
-            <Participant key={participant.sid} participant={participant} />
-          ))}
+        
+        <div className="h-[calc(100%-50px)] overflow-y-auto">
+          {/* Dynamic grid layout based on participant count */}
+          <div className={`grid gap-2 md:gap-4 h-full ${
+            participants.length === 0 
+              ? 'grid-cols-1' 
+              : participants.length <= 1 
+                ? 'grid-cols-1 md:grid-cols-2' 
+                : participants.length <= 3 
+                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' 
+                  : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
+          }`}>
+            {/* Local participant always shows first */}
+            {room && (
+              <div className={`${participants.length === 0 ? 'col-span-full aspect-video max-h-[70vh] mx-auto' : ''}`}>
+                <Participant
+                  key={room.localParticipant.sid}
+                  participant={room.localParticipant}
+                  isLocal={true}
+                />
+              </div>
+            )}
+            
+            {/* Remote participants */}
+            {participants.map((participant) => (
+              <div key={participant.sid}>
+                <Participant participant={participant} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="bg-white py-2 border-t">
+      
+      <div className="bg-gray-800 py-3 border-t border-gray-700 shadow-lg">
         <Controls
           toggleAudio={toggleAudio}
           toggleVideo={toggleVideo}
